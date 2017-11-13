@@ -18,5 +18,6 @@ public class App {
         }
 
         Analyser analyser = new Analyser(file);
+        analyser.run();
     }
 }
