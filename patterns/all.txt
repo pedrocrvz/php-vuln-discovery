@@ -65,5 +65,5 @@ file_get_contents
 
 PHP Code Injection
 $_GET,$_POST,$_COOKIE,$_REQUEST,$_FILES,$_SERVERS
-htmlentities,htmlspecialchars,strip_tags,urlencode,san_rdata,san_wdata,san_out
+mysql_escape_string,mysql_real_escape_string,mysqli_stmt_bind_param,mysqli::escape_string,mysqli::real_escape_string,db2_escape_string,pg_escape_string,pg_escape_bytea,san_mix,san_osci,htmlentities,htmlspecialchars,strip_tags,urlencode,san_rdata,san_wdata,san_out
 eval
