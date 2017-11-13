@@ -3,10 +3,10 @@ package pt.ulisboa.tecnico.ssof;
 public enum NodeType {
     ASSIGN,
     CONCAT,
-    FUNCTION,
+    FUNCALL,
     ECHO,
     PROGRAM,
     STRING,
     VARIABLE,
-    ENCAPSED, INLINE, UNKNOWN
+    ENCAPSED, INLINE, UNKNOWN, IF, COMPARISON, WHILE, NUMBER, BLOCK
 }
