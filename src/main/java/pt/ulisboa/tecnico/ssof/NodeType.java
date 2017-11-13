@@ -8,5 +8,5 @@ public enum NodeType {
     PROGRAM,
     STRING,
     VARIABLE,
-    ENCAPSED, UNKNOWN
+    ENCAPSED, INLINE, UNKNOWN
 }

@@ -62,7 +62,7 @@ public class Analyser {
             processNode(tree, child.getAsJsonObject());
         }
 
-        System.out.println(tree);
+        tree.print();
     }
 
     private void processNode(Node parent, JsonObject ast){
@@ -76,6 +76,12 @@ public class Analyser {
                 break;
             case "call":
                 node = new Node(ast.get("what").getAsJsonObject().get("name").getAsString(), NodeType.FUNCTION);
+                break;
+            case "inline":
+                node = new Node(NodeType.INLINE);
+                break;
+            case "echo":
+                node = new Node(NodeType.ECHO);
                 break;
             case "encapsed":
                 node = new Node(NodeType.ENCAPSED);

@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.ssof;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,5 +41,21 @@ public class Node {
                 ", childNodes=" + childNodes +
                 ", type=" + type +
                 "}\n";
+    }
+
+    public void print(){
+        print(0);
+    }
+
+    public void print(int i){
+        if(isLeaf())
+            System.out.println(StringUtils.repeat("\t", i) + "[NODE] name='"+name+"', type='"+type+"', children=[]");
+        else {
+            System.out.println(StringUtils.repeat("\t", i) + "[NODE] name='" + name + "', type='" + type + "', children=[");
+            for (Node node : childNodes) {
+                node.print(i + 1);
+            }
+            System.out.println(StringUtils.repeat("\t", i) + "]");
+        }
     }
 }
