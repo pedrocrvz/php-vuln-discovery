@@ -20,10 +20,6 @@ public class Analyser {
 
     public void run() throws IOException {
         loadPatterns();
-
-        for(Vulnerability v: vulnerabilities)
-            System.out.println(v);
-
         buildTreeFromJSON();
         findVulnerabilities();
     }
@@ -33,9 +29,9 @@ public class Analyser {
         for(int i=0; i < fileLines.size(); i=i+5){
             vulnerabilities.add(new Vulnerability(
                     fileLines.get(i), //vuln name
-                    new ArrayList<String>(Arrays.asList(fileLines.get(i+1).split(","))), //entry points
-                    new ArrayList<String>(Arrays.asList(fileLines.get(i+2).split(","))), //sanitization functions
-                    new ArrayList<String>(Arrays.asList(fileLines.get(i+3).split(","))) //sensitive sinks
+                    Arrays.asList(fileLines.get(i+1).split(",")), //entry points
+                    Arrays.asList(fileLines.get(i+2).split(",")), //sanitization functions
+                    Arrays.asList(fileLines.get(i+3).split(",")) //sensitive sinks
             ));
         }
     }
@@ -48,6 +44,8 @@ public class Analyser {
         while ((sCurrentLine = br.readLine()) != null) {
             lines.add(sCurrentLine);
         }
+
+        br.close();
 
         return lines;
     }
