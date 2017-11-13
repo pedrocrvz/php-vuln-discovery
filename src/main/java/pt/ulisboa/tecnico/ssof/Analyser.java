@@ -124,11 +124,13 @@ public class Analyser {
             processNode(node, ast.get("left").getAsJsonObject());
             processNode(node, ast.get("right").getAsJsonObject());
         }
-        else if(ast.has("arguments")){
+
+        if(ast.has("arguments")){
             for(JsonElement argument: ast.get("arguments").getAsJsonArray())
                 processNode(node, argument.getAsJsonObject());
         }
-        else if(ast.get("kind").getAsString().equals("encapsed")){
+
+        if(ast.get("kind").getAsString().equals("encapsed")){
             for(JsonElement element: ast.get("value").getAsJsonArray())
                 processNode(node, element.getAsJsonObject());
         }
@@ -142,11 +144,11 @@ public class Analyser {
             processNode(node, ast.get("test").getAsJsonObject());
         }
 
-        if(ast.has("body")){
+        if(ast.has("body")  && !ast.get("body").isJsonNull()){
             processNode(node, ast.get("body").getAsJsonObject());
         }
 
-        if(ast.has("alternate")){
+        if(ast.has("alternate") && !ast.get("alternate").isJsonNull()){
             processNode(node, ast.get("alternate").getAsJsonObject());
         }
 
