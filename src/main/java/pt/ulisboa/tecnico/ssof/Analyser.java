@@ -17,8 +17,13 @@ public class Analyser {
     }
 
     public void run(){
+        loadPatterns();
         buildTreeFromJSON();
         findVulnerabilities();
+    }
+
+    private void loadPatterns(){
+
     }
 
     private void buildTreeFromJSON(){
