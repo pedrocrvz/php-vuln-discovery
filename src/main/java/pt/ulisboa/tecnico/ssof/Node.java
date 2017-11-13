@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
-    private String name;
-    private Node parentNode = null;
-    private List<Node> childNodes;
-    private NodeType type;
+    String name;
+    Node parentNode = null;
+    List<Node> childNodes;
+    NodeType type;
 
     public Node(NodeType type){
         childNodes = new ArrayList<>();
@@ -26,5 +26,18 @@ public class Node {
 
     public void setParentNode(Node node){
         this.parentNode = node;
+    }
+
+    public boolean isLeaf(){
+        return childNodes.size() == 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "name='" + name + '\'' +
+                ", childNodes=" + childNodes +
+                ", type=" + type +
+                "}\n";
     }
 }

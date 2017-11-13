@@ -1,5 +1,9 @@
 package pt.ulisboa.tecnico.ssof;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,12 +13,13 @@ import java.util.Scanner;
 public class Analyser {
     private static final String PATTERNS_PATH = "patterns/all.txt";
 
-    private File sliceFile;
+    private File jsonSource;
     private List<Vulnerability> vulnerabilities;
+    private JsonObject astJSON;
+    private Node tree;
 
-
-    public Analyser(File sliceFile){
-        this.sliceFile = sliceFile;
+    public Analyser(File jsonSource){
+        this.jsonSource = jsonSource;
         this.vulnerabilities = new ArrayList<>();
     }
 
@@ -50,11 +55,63 @@ public class Analyser {
         return lines;
     }
 
-    private void buildTreeFromJSON(){
+    private void buildTreeFromJSON() throws FileNotFoundException {
+        astJSON = new JsonParser().parse(new FileReader(jsonSource)).getAsJsonObject();
+        tree = new Node(NodeType.PROGRAM);
+        for(JsonElement child: astJSON.get("children").getAsJsonArray()){
+            processNode(tree, child.getAsJsonObject());
+        }
 
+        System.out.println(tree);
+    }
+
+    private void processNode(Node parent, JsonObject ast){
+        Node node;
+        switch (ast.get("kind").getAsString()){
+            case "offsetlookup":
+                node = new Node(ast.get("what").getAsJsonObject().get("name").getAsString(), NodeType.VARIABLE);
+                break;
+            case "variable":
+                node = new Node(ast.get("name").getAsString(), NodeType.VARIABLE);
+                break;
+            case "call":
+                node = new Node(ast.get("what").getAsJsonObject().get("name").getAsString(), NodeType.FUNCTION);
+                break;
+            case "encapsed":
+                node = new Node(NodeType.ENCAPSED);
+                break;
+            case "assign":
+                node = new Node(NodeType.ASSIGN);
+                break;
+            case "bin":
+                node = new Node(NodeType.CONCAT);
+                break;
+            case "string":
+                node = new Node(NodeType.STRING);
+                break;
+            default:
+                node = new Node(NodeType.UNKNOWN);
+                break;
+        }
+
+        parent.appendChild(node);
+
+        if(ast.has("left") && ast.has("right")) {
+            processNode(node, ast.get("left").getAsJsonObject());
+            processNode(node, ast.get("right").getAsJsonObject());
+        }
+        else if(ast.has("arguments")){
+            for(JsonElement argument: ast.get("arguments").getAsJsonArray()){
+                processNode(node, argument.getAsJsonObject());
+            }
+        }
+        else if(ast.get("kind").getAsString().equals("encapsed")){
+            for(JsonElement element: ast.get("value").getAsJsonArray()){
+                processNode(node, element.getAsJsonObject());
+            }
+        }
     }
 
     private void findVulnerabilities(){
-
     }
 }

@@ -5,6 +5,8 @@ public enum NodeType {
     CONCAT,
     FUNCTION,
     ECHO,
+    PROGRAM,
     STRING,
-    VARIABLE
+    VARIABLE,
+    ENCAPSED, UNKNOWN
 }
