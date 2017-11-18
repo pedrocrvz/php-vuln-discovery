@@ -34,6 +34,16 @@ public class Node {
         return childNodes.size() == 0;
     }
 
+    public NodeType getType() {
+        return type;
+    }
+
+    public int getDepth(){
+        if(parentNode == null)
+            return 0;
+        else return 1 + parentNode.getDepth();
+    }
+
     @Override
     public String toString() {
         return "Node{" +

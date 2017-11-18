@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.ssof;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 
 public class Analyser {
     private static final String PATTERNS_PATH = "patterns/all.txt";
+    private static boolean PRINT_DEBUG_INFO = false;
 
     private File jsonSource;
     private List<Vulnerability> vulnerabilities;
@@ -28,16 +30,30 @@ public class Analyser {
         findVulnerabilities();
     }
 
+    public void toggleDebugInfo(){
+        PRINT_DEBUG_INFO = !PRINT_DEBUG_INFO;
+    }
+
     private void loadPatterns() throws IOException {
+        if(PRINT_DEBUG_INFO)
+            System.out.println("\nStarting loading patterns");
+
         List<String> fileLines = readFile(PATTERNS_PATH);
         for(int i=0; i < fileLines.size(); i=i+5){
-            vulnerabilities.add(new Vulnerability(
+            Vulnerability v = new Vulnerability(
                     fileLines.get(i), //vuln name
                     Arrays.asList(fileLines.get(i+1).split(",")), //entry points
                     Arrays.asList(fileLines.get(i+2).split(",")), //sanitization functions
                     Arrays.asList(fileLines.get(i+3).split(",")) //sensitive sinks
-            ));
+            );
+            vulnerabilities.add(v);
+
+            if(PRINT_DEBUG_INFO) {
+                System.out.println(v + " loaded");
+            }
         }
+        if(PRINT_DEBUG_INFO)
+            System.out.println("Finished loading patterns");
     }
 
     private List<String> readFile(String filePath) throws IOException {
@@ -55,13 +71,21 @@ public class Analyser {
     }
 
     private void buildTreeFromJSON() throws FileNotFoundException {
+        if(PRINT_DEBUG_INFO)
+            System.out.println("\nStarted loading tree");
+
         astJSON = new JsonParser().parse(new FileReader(jsonSource)).getAsJsonObject();
         tree = new Node(NodeType.PROGRAM);
+
+        if(PRINT_DEBUG_INFO)
+            System.out.println(StringUtils.repeat("\t", tree.getDepth()) + tree.getType());
+
         for(JsonElement child: astJSON.get("children").getAsJsonArray()){
             processNode(tree, child.getAsJsonObject());
         }
 
-        tree.print();
+        if(PRINT_DEBUG_INFO)
+            System.out.println("Finished loading tree");
     }
 
     private void processNode(Node parent, JsonObject ast){
@@ -120,6 +144,9 @@ public class Analyser {
 
         parent.appendChild(node);
 
+        if(PRINT_DEBUG_INFO)
+            System.out.println(StringUtils.repeat("\t", node.getDepth()) + node.getType());
+
         if(ast.has("left") && ast.has("right")) {
             processNode(node, ast.get("left").getAsJsonObject());
             processNode(node, ast.get("right").getAsJsonObject());
@@ -151,9 +178,15 @@ public class Analyser {
         if(ast.has("alternate") && !ast.get("alternate").isJsonNull()){
             processNode(node, ast.get("alternate").getAsJsonObject());
         }
-
     }
 
     private void findVulnerabilities(){
+        if(PRINT_DEBUG_INFO)
+            System.out.println("\nStarting finding vulnerabilities");
+
+        List<Node> badNodes = new ArrayList<>();
+
+        if(PRINT_DEBUG_INFO)
+            System.out.println("Finished finding vulnerabilities");
     }
 }

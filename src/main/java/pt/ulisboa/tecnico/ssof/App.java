@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico.ssof;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class App {
@@ -20,6 +19,10 @@ public class App {
         }
 
         Analyser analyser = new Analyser(file);
+
+        if(args.length > 1 && args[1].equals("debug"))
+            analyser.toggleDebugInfo();
+
         try {
             analyser.run();
         } catch (IOException e) {
