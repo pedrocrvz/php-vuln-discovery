@@ -15,13 +15,13 @@ public class Analyser {
     private static boolean PRINT_DEBUG_INFO = false;
 
     private File jsonSource;
-    private List<Vulnerability> vulnerabilities;
+    private List<VulnPattern> vulnPatterns;
     private JsonObject astJSON;
     private Node tree;
 
     public Analyser(File jsonSource){
         this.jsonSource = jsonSource;
-        this.vulnerabilities = new ArrayList<>();
+        this.vulnPatterns = new ArrayList<>();
     }
 
     public void run() throws IOException {
@@ -40,13 +40,13 @@ public class Analyser {
 
         List<String> fileLines = readFile(PATTERNS_PATH);
         for(int i=0; i < fileLines.size(); i=i+5){
-            Vulnerability v = new Vulnerability(
+            VulnPattern v = new VulnPattern(
                     fileLines.get(i), //vuln name
                     Arrays.asList(fileLines.get(i+1).split(",")), //entry points
                     Arrays.asList(fileLines.get(i+2).split(",")), //sanitization functions
                     Arrays.asList(fileLines.get(i+3).split(",")) //sensitive sinks
             );
-            vulnerabilities.add(v);
+            vulnPatterns.add(v);
 
             if(PRINT_DEBUG_INFO) {
                 System.out.println(v + " loaded");
@@ -182,11 +182,11 @@ public class Analyser {
 
     private void findVulnerabilities(){
         if(PRINT_DEBUG_INFO)
-            System.out.println("\nStarting finding vulnerabilities");
+            System.out.println("\nStarting finding vulnPatterns");
 
         List<Node> badNodes = new ArrayList<>();
 
         if(PRINT_DEBUG_INFO)
-            System.out.println("Finished finding vulnerabilities");
+            System.out.println("Finished finding vulnPatterns");
     }
 }
