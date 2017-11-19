@@ -113,7 +113,7 @@ public class Analyser {
                 node = new Node(NodeType.INLINE);
                 break;
             case "echo":
-                node = new Node(NodeType.ECHO);
+                node = new Node("echo", NodeType.FUNCALL);
                 break;
             case "encapsed":
                 node = new Node(NodeType.ENCAPSED);
@@ -184,9 +184,17 @@ public class Analyser {
         if(PRINT_DEBUG_INFO)
             System.out.println("\nStarting finding vulnPatterns");
 
-        List<Node> badNodes = new ArrayList<>();
+        List<Node> sensitiveSinks = tree.getSensitiveNodes(vulnPatterns);
+        System.out.println("\nSensitive Sinks:");
+        for(Node node: sensitiveSinks)
+            for(VulnPattern vp: node.getVulns())
+                System.out.println(node.getName() + " " + vp.getName());
 
         if(PRINT_DEBUG_INFO)
             System.out.println("Finished finding vulnPatterns");
+    }
+
+    private void evaluateVuln(Node node){
+        
     }
 }

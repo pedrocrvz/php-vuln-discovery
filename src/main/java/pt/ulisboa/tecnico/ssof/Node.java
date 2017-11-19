@@ -5,15 +5,20 @@ import org.apache.commons.lang.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.UUID;
+
 public class Node {
-    String name;
-    Node parentNode = null;
-    List<Node> childNodes;
-    NodeType type;
+    private final UUID uuid = UUID.randomUUID(); //Node id ti ease equals comparison
+    private String name;
+    private Node parentNode = null;
+    private List<Node> childNodes;
+    private NodeType type;
+    private List<VulnPattern> vulns;
 
     public Node(NodeType type){
         childNodes = new ArrayList<>();
         this.type = type;
+        vulns = new ArrayList<>();
     }
 
     public Node(String name, NodeType type){
@@ -53,6 +58,47 @@ public class Node {
                 "}\n";
     }
 
+    public List<Node> getChildNodes() {
+        return childNodes;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Node getParentNode() {
+        return parentNode;
+    }
+
+    public List<VulnPattern> getVulns() {
+        return vulns;
+    }
+
+    public List<Node> getSensitiveNodes(List<VulnPattern> patterns){
+        List<Node> nodes = new ArrayList<>();
+        if(this.type.equals(NodeType.FUNCALL)) {
+            for (VulnPattern pattern : patterns) {
+                if(pattern.getSensitiveSinks().contains(name)){ //O nó atual é uma chamada a nó sensível
+                    if(!nodes.contains(this))
+                        nodes.add(this);
+                    this.vulns.add(pattern);
+                }
+            }
+        }
+        else{
+            if(!isLeaf()){
+                for(Node child: getChildNodes()){
+                    nodes.addAll(child.getSensitiveNodes(patterns));
+                }
+            }
+        }
+        return nodes;
+    }
+
     public void print(){
         print(0);
     }
@@ -67,5 +113,15 @@ public class Node {
             }
             System.out.println(StringUtils.repeat("\t", i) + "]");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Node node = (Node) o;
+
+        return this.uuid.equals(node.uuid);
     }
 }

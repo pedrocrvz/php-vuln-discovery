@@ -15,6 +15,10 @@ public class VulnPattern {
         this.sensitiveSinks = sensitiveSinks;
     }
 
+    public List<String> getSensitiveSinks() {
+        return sensitiveSinks;
+    }
+
     public String getName() {
         return name;
     }

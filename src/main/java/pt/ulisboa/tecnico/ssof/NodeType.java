@@ -4,7 +4,6 @@ public enum NodeType {
     ASSIGN,
     CONCAT,
     FUNCALL,
-    ECHO,
     PROGRAM,
     STRING,
     VARIABLE,

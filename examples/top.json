@@ -1,0 +1,98 @@
+{
+  "kind": "program",
+  "children": [
+    {
+      "kind": "assign",
+      "operator": "=",
+      "left": {
+        "kind": "variable",
+        "name": "a",
+        "byref": false,
+        "curly": false
+      },
+      "right": {
+        "kind": "offsetlookup",
+        "what": {
+          "kind": "variable",
+          "name": "_POST",
+          "byref": false,
+          "curly": false
+        },
+        "offset": {
+          "kind": "string",
+          "value": "yo",
+          "isDoubleQuote": true
+        }
+      }
+    },
+    {
+      "kind": "while",
+      "test": {
+        "kind": "call",
+        "what": {
+          "kind": "identifier",
+          "resolution": "uqn",
+          "name": "mysql_query"
+        },
+        "arguments": [
+          {
+            "kind": "variable",
+            "name": "a",
+            "byref": false,
+            "curly": false
+          }
+        ]
+      },
+      "body": {
+        "kind": "block",
+        "children": [
+          {
+            "kind": "call",
+            "what": {
+              "kind": "identifier",
+              "resolution": "uqn",
+              "name": "file_get_contents"
+            },
+            "arguments": [
+              {
+                "kind": "variable",
+                "name": "a",
+                "byref": false,
+                "curly": false
+              }
+            ]
+          },
+          {
+            "kind": "call",
+            "what": {
+              "kind": "identifier",
+              "resolution": "uqn",
+              "name": "fopen"
+            },
+            "arguments": [
+              {
+                "kind": "variable",
+                "name": "a",
+                "byref": false,
+                "curly": false
+              }
+            ]
+          }
+        ]
+      },
+      "shortForm": false
+    },
+    {
+      "kind": "echo",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "yo",
+          "isDoubleQuote": true
+        }
+      ]
+    }
+  ],
+  "errors": []
+}
+
