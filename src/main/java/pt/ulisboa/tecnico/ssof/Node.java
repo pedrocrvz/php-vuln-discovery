@@ -16,7 +16,7 @@ public class Node {
     private NodeType type;
     private NodeStatus status;
     private Node root;
-    private int visitsDone = 0;
+    //private int visitsDone = 0;
 
     //Root attributes
     private List<VulnPattern> vulns;
@@ -145,16 +145,16 @@ public class Node {
         return status;
     }
 
-    private int getWhileBlockInstCount(){
+    /*private int getWhileBlockInstCount(){
         if(!type.equals(NodeType.WHILE)) return parentNode.getWhileBlockInstCount();
         if(childNodes.get(1) == null) return 0;
         else return childNodes.get(1).childNodes.size();
-    }
+    }*/
 
     public void processIntegrityCheck(){
-        if(visitsDone >= 1 && !isInside(NodeType.WHILE)) return;
+        /*if(visitsDone >= 1 && !isInside(NodeType.WHILE)) return;
         else if(isInside(NodeType.WHILE) && visitsDone >= getWhileBlockInstCount()) return;
-        visitsDone++;
+        visitsDone++;*/
 
         if(!isLeaf()) {
             for (Node child : childNodes) {
@@ -201,7 +201,7 @@ public class Node {
             }
         }
 
-        if(type.equals(NodeType.WHILE)) processIntegrityCheck();
+        //if(type.equals(NodeType.WHILE)) processIntegrityCheck();
     }
 
     private boolean isInside(NodeType nodeType) {
