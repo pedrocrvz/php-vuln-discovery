@@ -14,14 +14,17 @@ public class Node {
     private Node parentNode;
     private List<Node> childNodes;
     private NodeType type;
-    private List<VulnPattern> vulns;
     private NodeStatus status;
     private Node root;
+    private int visitsDone = 0;
+
+    //Root attributes
+    private List<VulnPattern> vulns;
     HashMap<String, NodeStatus> varStatus;
     HashMap<String, Node> rescueNode;
 
     enum NodeStatus {
-        OK, TOXIC, ATTACK
+        OK, TOXIC
     }
 
     public Node(NodeType type){
@@ -142,7 +145,19 @@ public class Node {
         return status;
     }
 
+    private int getWhileBlockInstCount(){
+        if(!type.equals(NodeType.WHILE)) return parentNode.getWhileBlockInstCount();
+        if(childNodes.get(1) == null) return 0;
+        else return childNodes.get(1).childNodes.size();
+    }
+
     public void processIntegrityCheck(){
+        if(visitsDone >= 1 && !isInside(NodeType.WHILE)) return;
+        else if(isInside(NodeType.WHILE) && visitsDone >= getWhileBlockInstCount()) return;
+        visitsDone++;
+
+        System.out.println("Iteration " + visitsDone + " of " + type);
+
         if(!isLeaf()) {
             for (Node child : childNodes) {
                 child.processIntegrityCheck();
@@ -150,35 +165,54 @@ public class Node {
         }
 
         for(VulnPattern vp: root.vulns){
-            if(type.equals(NodeType.VARIABLE)){
-                if(vp.getEntryPoints().contains(name)) { //entry point found
-                    status = NodeStatus.TOXIC;
-                    root.varStatus.put(getName(), status);
-                }
-                else if(root.varStatus.containsKey(name)){
-                        status = root.varStatus.get(name);
-                }
-            }
-            else if(type.equals(NodeType.ASSIGN)) {
-                Node left = childNodes.get(0);
-                Node right = childNodes.get(1);
-
-                if(right.getType().equals(NodeType.FUNCALL)){
-                    if(vp.getSanitizeFunctions().contains(right.getName())) { //sanitize found
-                        status = NodeStatus.OK;
-                        root.varStatus.put(left.getName(), status);
-                        root.rescueNode.put(left.getName(), right);
+            switch (type){
+                case COMPARISON:
+                    break;
+                case VARIABLE:
+                    if(vp.getEntryPoints().contains(name)) { //entry point found
+                        status = NodeStatus.TOXIC;
+                        root.varStatus.put(getName(), status);
                     }
-                }
-                else
-                    status = andNodeStatus(right);
-                left.setStatus(status);
-                root.varStatus.put(left.getName(), status);
-            }
-            else if(type.equals(NodeType.ENCAPSED)){
-                status = andNodeStatus(childNodes.toArray(new Node[childNodes.size()]));
+                    else if(root.varStatus.containsKey(name)){
+                        status = root.varStatus.get(name);
+                    }
+                    break;
+                case ASSIGN:
+                    Node left = childNodes.get(0);
+                    Node right = childNodes.get(1);
+
+                    if(isInside(NodeType.IF)){
+                        if(root.varStatus.containsKey(left.getName())) return;
+                    }
+
+                    if(right.getType().equals(NodeType.FUNCALL)){
+                        if(vp.getSanitizeFunctions().contains(right.getName())) { //sanitize found
+                            status = NodeStatus.OK;
+                            root.varStatus.put(left.getName(), status);
+                            root.rescueNode.put(left.getName(), right);
+                        }
+                    }
+                    else
+                        status = andNodeStatus(right);
+                    left.setStatus(status);
+                    root.varStatus.put(left.getName(), status);
+                    break;
+                default:
+                    status = andNodeStatus(childNodes.toArray(new Node[childNodes.size()]));
+                    break;
             }
         }
+
+        if(type.equals(NodeType.WHILE)) processIntegrityCheck();
+    }
+
+    private boolean isInside(NodeType nodeType) {
+        if(this == root)
+            return false;
+        else if (type.equals(nodeType))
+            return true;
+        else
+            return parentNode.isInside(nodeType);
     }
 
     public void setStatus(NodeStatus ns){
@@ -201,24 +235,14 @@ public class Node {
         return NodeStatus.OK;
     }
 
-    public void print(){
-        print(0);
-    }
-
-    public void print(int i){
-        if(isLeaf())
-            System.out.println(StringUtils.repeat("\t", i) + "[NODE] name='"+name+"', type='"+type+"', children=[]");
-        else {
-            System.out.println(StringUtils.repeat("\t", i) + "[NODE] name='" + name + "', type='" + type + "', children=[");
-            for (Node node : childNodes) {
-                node.print(i + 1);
-            }
-            System.out.println(StringUtils.repeat("\t", i) + "]");
-        }
-    }
-
     public boolean isVulnerable(){
         return andNodeStatus(childNodes.toArray(new Node[childNodes.size()])) != NodeStatus.OK;
+    }
+
+    public void print(){
+        System.out.println(StringUtils.repeat("\t", getDepth()) + getType() + ">" + getName() + " ~ " + getStatus());
+        for(Node n: childNodes)
+            n.print();
     }
 
     @Override

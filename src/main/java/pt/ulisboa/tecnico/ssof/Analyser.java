@@ -199,6 +199,9 @@ public class Analyser {
         if(PRINT_DEBUG_INFO){
             System.out.println(tree.varStatus);
             System.out.println(tree.rescueNode);
+            System.out.println("\n");
+            tree.print();
+            System.out.println();
         }
 
         for(Node n: sensitiveSinks){
