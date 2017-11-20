@@ -76,6 +76,7 @@ public class Analyser {
 
         astJSON = new JsonParser().parse(new FileReader(jsonSource)).getAsJsonObject();
         tree = new Node(NodeType.PROGRAM);
+        tree.setRoot(tree);
 
         if(PRINT_DEBUG_INFO)
             System.out.println(StringUtils.repeat("\t", tree.getDepth()) + tree.getType());
@@ -92,60 +93,60 @@ public class Analyser {
         Node node;
         switch (ast.get("kind").getAsString()){
             case "offsetlookup":
-                node = new Node(ast.get("what").getAsJsonObject().get("name").getAsString(), NodeType.VARIABLE);
+                node = new Node(ast.get("what").getAsJsonObject().get("name").getAsString(), NodeType.VARIABLE, tree);
                 break;
             case "variable":
-                node = new Node(ast.get("name").getAsString(), NodeType.VARIABLE);
+                node = new Node(ast.get("name").getAsString(), NodeType.VARIABLE, tree);
                 break;
             case "call":
-                node = new Node(ast.get("what").getAsJsonObject().get("name").getAsString(), NodeType.FUNCALL);
+                node = new Node(ast.get("what").getAsJsonObject().get("name").getAsString(), NodeType.FUNCALL, tree);
                 break;
             case "if":
-                node = new Node(NodeType.IF);
+                node = new Node(NodeType.IF, tree);
                 break;
             case "block":
-                node = new Node(NodeType.BLOCK);
+                node = new Node(NodeType.BLOCK, tree);
                 break;
             case "while":
-                node = new Node(NodeType.WHILE);
+                node = new Node(NodeType.WHILE, tree);
                 break;
             case "inline":
-                node = new Node(NodeType.INLINE);
+                node = new Node(NodeType.INLINE, tree);
                 break;
             case "echo":
-                node = new Node("echo", NodeType.FUNCALL);
+                node = new Node("echo", NodeType.FUNCALL, tree);
                 break;
             case "encapsed":
-                node = new Node(NodeType.ENCAPSED);
+                node = new Node(NodeType.ENCAPSED, tree);
                 break;
             case "assign":
-                node = new Node(NodeType.ASSIGN);
+                node = new Node(NodeType.ASSIGN, tree);
                 break;
             case "bin":
                 switch(ast.get("type").getAsString()){
                     case ".":
-                        node = new Node(NodeType.CONCAT);
+                        node = new Node(NodeType.ENCAPSED, tree);
                         break;
                     default:
-                        node = new Node(NodeType.COMPARISON);
+                        node = new Node(NodeType.COMPARISON, tree);
                         break;
                 }
                 break;
             case "string":
-                node = new Node(NodeType.STRING);
+                node = new Node(NodeType.STRING, tree);
                 break;
             case "number":
-                node = new Node(NodeType.NUMBER);
+                node = new Node(NodeType.NUMBER, tree);
                 break;
             default:
-                node = new Node(NodeType.UNKNOWN);
+                node = new Node(NodeType.UNKNOWN, tree);
                 break;
         }
 
         parent.appendChild(node);
 
         if(PRINT_DEBUG_INFO)
-            System.out.println(StringUtils.repeat("\t", node.getDepth()) + node.getType());
+            System.out.println(StringUtils.repeat("\t", node.getDepth()) + node.getType() + ">" + node.getName());
 
         if(ast.has("left") && ast.has("right")) {
             processNode(node, ast.get("left").getAsJsonObject());
@@ -185,16 +186,32 @@ public class Analyser {
             System.out.println("\nStarting finding vulnPatterns");
 
         List<Node> sensitiveSinks = tree.getSensitiveNodes(vulnPatterns);
-        System.out.println("\nSensitive Sinks:");
-        for(Node node: sensitiveSinks)
-            for(VulnPattern vp: node.getVulns())
-                System.out.println(node.getName() + " " + vp.getName());
+        List<Node> vulns = new ArrayList<>();
+
+        tree.processIntegrityCheck();
+
+        for(Node n: sensitiveSinks){
+            if(n.isVulnerable()){
+                vulns.add(n);
+            }
+        }
+
+        if(PRINT_DEBUG_INFO){
+            System.out.println(tree.varStatus);
+            System.out.println(tree.rescueNode);
+        }
+
+        for(Node n: sensitiveSinks){
+            if(vulns.contains(n))
+                System.out.println("This program is vulnerable in function call " + n.getName());
+            else
+                System.out.println("This program was potentially vulnerable in function call " + n.getName() +
+                        ", but " + tree.rescueNode.get(n.getVarName()).getName() + " validated the value");
+        }
+
+
 
         if(PRINT_DEBUG_INFO)
             System.out.println("Finished finding vulnPatterns");
-    }
-
-    private void evaluateVuln(Node node){
-        
     }
 }

@@ -23,6 +23,14 @@ public class VulnPattern {
         return name;
     }
 
+    public List<String> getEntryPoints() {
+        return entryPoints;
+    }
+
+    public List<String> getSanitizeFunctions() {
+        return sanitizeFunctions;
+    }
+
     @Override
     public String toString(){
         return "[VULN] name="+name+", entryPoints="+entryPoints+", sanitizeFunctions="+sanitizeFunctions+", " +
