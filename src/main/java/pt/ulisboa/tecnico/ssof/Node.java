@@ -156,8 +156,6 @@ public class Node {
         else if(isInside(NodeType.WHILE) && visitsDone >= getWhileBlockInstCount()) return;
         visitsDone++;
 
-        System.out.println("Iteration " + visitsDone + " of " + type);
-
         if(!isLeaf()) {
             for (Node child : childNodes) {
                 child.processIntegrityCheck();

@@ -208,8 +208,11 @@ public class Analyser {
             if(vulns.contains(n))
                 System.out.println("This program is vulnerable in function call " + n.getName());
             else
-                System.out.println("This program was potentially vulnerable in function call " + n.getName() +
+                if(!tree.rescueNode.isEmpty())
+                    System.out.println("This program was potentially vulnerable in function call " + n.getName() +
                         ", but " + tree.rescueNode.get(n.getVarName()).getName() + " validated the value");
+                else
+                    System.out.println("Program is safe");
         }
 
 
